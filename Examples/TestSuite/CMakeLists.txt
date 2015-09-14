@@ -740,6 +740,11 @@ ExternalData_add_test( ${PROJECT_NAME}FetchData NAME ${antsRegistrationTestName}
   --shrink-factors 3
   --smoothing-sigmas 2
   --metric Mattes[${test_image_VAR},${scale_test_image_VAR},1,200]
+  --transform "Similarity[0.003]"
+  --convergence 15
+  --shrink-factors 3
+  --smoothing-sigmas 2
+  --metric Mattes[${test_image_VAR},${scale_test_image_VAR},1,200]
   --transform "Affine[0.001]"
   --convergence 15
   --shrink-factors 3

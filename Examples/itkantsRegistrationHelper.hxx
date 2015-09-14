@@ -3700,8 +3700,9 @@ RegistrationHelper<TComputeType, VImageDimension>
                                          const std::string transformTypeName,
                                          typename TTransformType::Pointer & resultTransform )
 {
-  typedef itk::TranslationTransform<RealType, VImageDimension> TranslationTransformType;
-  typedef typename RigidTransformTraits<TComputeType, VImageDimension>::TransformType RigidTransformType;
+  typedef itk::TranslationTransform<RealType, VImageDimension>                              TranslationTransformType;
+  typedef typename RigidTransformTraits<TComputeType, VImageDimension>::TransformType       RigidTransformType;
+  typedef typename SimilarityTransformTraits<TComputeType, VImageDimension>::TransformType  SimilarityTransformType;
 
   std::string previousTxFileType = "";
   const typename TransformType::ConstPointer preTransform = compositeTransform->GetBackTransform();
@@ -3779,6 +3780,57 @@ RegistrationHelper<TComputeType, VImageDimension>
       }
     }
 /////
+  else if( transformTypeName == "Similarity3D" )
+    {
+    typename SimilarityTransformType::Pointer initialTransform =
+      dynamic_cast<SimilarityTransformType *>(resultTransform.GetPointer());
+    initialTransform->SetIdentity();
+    if( previousTxFileType == "TranslationTransform" )
+      {
+      typename TranslationTransformType::ConstPointer tempInitializerTransform =
+        dynamic_cast<TranslationTransformType const *>( preTransform.GetPointer() );
+      if( tempInitializerTransform.IsNull() )
+        {
+        std::cout << "WARNING: Initialization Failed" << std::endl;
+        return false;
+        }
+      //Translation to Similarity
+      initialTransform->SetOffset( tempInitializerTransform->GetOffset() );
+      }
+    else if( previousTxFileType == "Euler3DTransform" || previousTxFileType == "Euler2DTransform" )
+      {
+      typename RigidTransformType::ConstPointer tempInitializerTransform =
+        dynamic_cast<RigidTransformType const *>( preTransform.GetPointer() );
+      if( tempInitializerTransform.IsNull() )
+        {
+        std::cout << "WARNING: Initialization Failed" << std::endl;
+        return false;
+        }
+      //Rigid to Similarity
+      initialTransform->SetCenter( tempInitializerTransform->GetCenter() );
+      initialTransform->SetMatrix( tempInitializerTransform->GetMatrix() );
+      initialTransform->SetTranslation( tempInitializerTransform->GetTranslation() );
+      }
+    else if( previousTxFileType == "Similarity3DTransform" || previousTxFileType == "Similarity2DTransform" )
+      {
+      typename SimilarityTransformType::ConstPointer tempInitializerTransform =
+        dynamic_cast<SimilarityTransformType const *>( preTransform.GetPointer() );
+      if( tempInitializerTransform.IsNull() )
+        {
+        std::cout << "WARNING: Initialization Failed" << std::endl;
+        return false;
+        }
+      //Similarity to Similarity
+      initialTransform->SetFixedParameters( tempInitializerTransform->GetFixedParameters() );
+      initialTransform->SetParameters( tempInitializerTransform->GetParameters() );
+      }
+    else
+      {
+      std::cout << "WARNING: Initialization Failed" << std::endl;
+      return false;
+      }
+    }
+////
   else if( transformTypeName == "Affine" )
     {
     typename AffineTransformType::Pointer initialTransform =
@@ -3807,6 +3859,20 @@ RegistrationHelper<TComputeType, VImageDimension>
         return false;
         }
       //Rigid to Affine
+      initialTransform->SetCenter( tempInitializerTransform->GetCenter() );
+      initialTransform->SetMatrix( tempInitializerTransform->GetMatrix() );
+      initialTransform->SetTranslation( tempInitializerTransform->GetTranslation() );
+      }
+    else if( previousTxFileType == "Similarity3DTransform" || previousTxFileType == "Similarity2DTransform" )
+      {
+      typename SimilarityTransformType::ConstPointer tempInitializerTransform =
+        dynamic_cast<SimilarityTransformType const *>( preTransform.GetPointer() );
+      if( tempInitializerTransform.IsNull() )
+        {
+        std::cout << "WARNING: Initialization Failed" << std::endl;
+        return false;
+        }
+      //Similarity to Affine
       initialTransform->SetCenter( tempInitializerTransform->GetCenter() );
       initialTransform->SetMatrix( tempInitializerTransform->GetMatrix() );
       initialTransform->SetTranslation( tempInitializerTransform->GetTranslation() );
