@@ -114,6 +114,7 @@ int LabelGeometryMeasures( int argc, char * argv[] )
     columnHeaders.emplace_back( "Label" );
     columnHeaders.emplace_back( "VolumeInCubicMillimeters" );
     columnHeaders.emplace_back( "SurfaceAreaInMillimetersSquared" );
+    columnHeaders.emplace_back( "ThicknessInMillimeters" );
     columnHeaders.emplace_back( "Eccentricity" );
     columnHeaders.emplace_back( "Elongation" );
     columnHeaders.emplace_back( "Orientation" );
@@ -174,11 +175,16 @@ int LabelGeometryMeasures( int argc, char * argv[] )
 
       unsigned int columnIndex = 0;
 //      measures( rowIndex, columnIndex ) = static_cast< double >( *allLabelsIt );
-      measures( rowIndex, columnIndex++ ) = filter->GetVolume( *allLabelsIt ) * vox_volume;
+      const double region_volume = filter->GetVolume( *allLabelsIt ) * vox_volume;
+      measures( rowIndex, columnIndex++ ) = region_volume;
 
       const LabelObjectType * labelObject = labelMap->GetLabelObject( *allLabelsIt );
+      const double region_area = labelObject->GetPerimeter();
+      measures( rowIndex, columnIndex++ ) = region_area;
 
-      measures( rowIndex, columnIndex++ ) = labelObject->GetPerimeter();
+      const double thickness = 2 * region_volume / region_area;
+      measures( rowIndex, columnIndex++ ) = thickness;
+
       measures( rowIndex, columnIndex++ ) = filter->GetEccentricity( *allLabelsIt );
       measures( rowIndex, columnIndex++ ) = filter->GetElongation( *allLabelsIt );
       measures( rowIndex, columnIndex++ ) = filter->GetOrientation( *allLabelsIt );
@@ -248,6 +254,7 @@ int LabelGeometryMeasures( int argc, char * argv[] )
     std::cout << std::left << std::setw( 7 ) << "Label"
              << std::left << std::setw( 10 ) << "Volume(mm^3)"
              << std::left << std::setw( 15 ) << "SurfArea(mm^2)"
+             << std::left << std::setw( 15 ) << "Thickness(mm)"
              << std::left << std::setw( 15 ) << "Eccentricity"
              << std::left << std::setw( 15 ) << "Elongation"
              << std::left << std::setw( 15 ) << "Orientation"
@@ -267,11 +274,16 @@ int LabelGeometryMeasures( int argc, char * argv[] )
         continue;
         }
       std::cout << std::setw( 7 ) << *allLabelsIt;
-      std::cout << std::setw( 10 ) << filter->GetVolume( *allLabelsIt ) * vox_volume;
+      const double region_volume = filter->GetVolume( *allLabelsIt ) * vox_volume;
+      std::cout << std::setw( 10 ) << region_volume;
 
       const LabelObjectType * labelObject = labelMap->GetLabelObject( *allLabelsIt );
+      const double region_area = labelObject->GetPerimeter();
+      std::cout << std::setw( 15 ) << region_area;
 
-      std::cout << std::setw( 15 ) << labelObject->GetPerimeter();
+      const double thickness = 2 * region_volume / region_area;
+      std::cout << std::setw( 15 ) << thickness;
+
       std::cout << std::setw( 15 ) << filter->GetEccentricity( *allLabelsIt );
       std::cout << std::setw( 15 ) << filter->GetElongation( *allLabelsIt );
       std::cout << std::setw( 15 ) << filter->GetOrientation( *allLabelsIt );
