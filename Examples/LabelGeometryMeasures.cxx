@@ -41,6 +41,9 @@ int LabelGeometryMeasures( int argc, char * argv[] )
   typename LabelImageType::Pointer labelImage = LabelImageType::New();
   ReadImage<LabelImageType>( labelImage, argv[2] );
 
+  const typename LabelImageType::SpacingType &spacing = labelImage->GetSpacing();
+  const double vox_volume = std::accumulate( spacing.Begin(), spacing.End(), 1.0, std::multiplies<double>() );
+
   typename RealImageType::Pointer intensityImage = RealImageType::New();
   bool intensityImageUsed = false;
   if( argc > 3 )
@@ -109,7 +112,7 @@ int LabelGeometryMeasures( int argc, char * argv[] )
     std::vector<std::string>   columnHeaders;
 
     columnHeaders.emplace_back( "Label" );
-    columnHeaders.emplace_back( "VolumeInVoxels" );
+    columnHeaders.emplace_back( "VolumeInCubicMillimeters" );
     columnHeaders.emplace_back( "SurfaceAreaInMillimetersSquared" );
     columnHeaders.emplace_back( "Eccentricity" );
     columnHeaders.emplace_back( "Elongation" );
@@ -171,7 +174,7 @@ int LabelGeometryMeasures( int argc, char * argv[] )
 
       unsigned int columnIndex = 0;
 //      measures( rowIndex, columnIndex ) = static_cast< double >( *allLabelsIt );
-      measures( rowIndex, columnIndex++ ) = filter->GetVolume( *allLabelsIt );
+      measures( rowIndex, columnIndex++ ) = filter->GetVolume( *allLabelsIt ) * vox_volume;
 
       const LabelObjectType * labelObject = labelMap->GetLabelObject( *allLabelsIt );
 
@@ -243,7 +246,7 @@ int LabelGeometryMeasures( int argc, char * argv[] )
   //   std::cout << "Number of labels: " << labelGeometryFilter->GetNumberOfLabels() << std::endl;
   //   std::cout << "Label geometry measures." << std::endl;
     std::cout << std::left << std::setw( 7 ) << "Label"
-             << std::left << std::setw( 10 ) << "Volume(voxels)"
+             << std::left << std::setw( 10 ) << "Volume(mm^3)"
              << std::left << std::setw( 15 ) << "SurfArea(mm^2)"
              << std::left << std::setw( 15 ) << "Eccentricity"
              << std::left << std::setw( 15 ) << "Elongation"
@@ -264,7 +267,7 @@ int LabelGeometryMeasures( int argc, char * argv[] )
         continue;
         }
       std::cout << std::setw( 7 ) << *allLabelsIt;
-      std::cout << std::setw( 10 ) << filter->GetVolume( *allLabelsIt );
+      std::cout << std::setw( 10 ) << filter->GetVolume( *allLabelsIt ) * vox_volume;
 
       const LabelObjectType * labelObject = labelMap->GetLabelObject( *allLabelsIt );
 
