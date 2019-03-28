@@ -222,7 +222,7 @@ Compulsory arguments (minimal command line requires SGE cluster, otherwise use -
      -l:  Labels:         Labels corresponding to atlas (cf -g).
 
 Optional arguments:
-  
+
      -m:  Majority vote:  Use majority vote instead of joint label fusion (default = ${MAJORITYVOTE}).
 
      -k:  Keep files:     Keep warped atlas and label files (default = ${KEEP_ALL_IMAGES}).
@@ -720,6 +720,8 @@ if [[ $DOQSUB -eq 0 ]];
               done
             maskCall="${maskCall} ${ANTSPATH}/ThresholdImage ${DIM} ${TARGET_MASK_IMAGE} ${TARGET_MASK_IMAGE} 0 0 0 1"
 
+            jlfCall="${jlfCall} -x ${TARGET_MASK_IMAGE}"
+
         elif [[ ${TARGET_MASK_IMAGE} == 'majorityvoting' ]];
           then
             MAJORITY_VOTING_IMAGE="${OUTPUT_PREFIX}TargetMaskImageMajorityVoting.nii.gz"
@@ -823,6 +825,13 @@ if [[ $DOQSUB -eq 1 ]];
             maskCall="${maskCall} ${ANTSPATH}/ThresholdImage ${DIM} ${TARGET_MASK_IMAGE} ${TARGET_MASK_IMAGE} 0 0 0 1"
 
             jlfCall="${jlfCall} -x ${TARGET_MASK_IMAGE}"
+
+        elif [[ ${TARGET_MASK_IMAGE} == 'majorityvoting' ]];
+          then
+            MAJORITY_VOTING_IMAGE="${OUTPUT_PREFIX}TargetMaskImageMajorityVoting.nii.gz"
+            maskCall="${ANTSPATH}/ImageMath ${DIM} ${MAJORITY_VOTING_IMAGE} MajorityVoting 0.8 ${EXISTING_WARPED_ATLAS_LABELS[@]};"
+            jlfCall="${jlfCall} -x ${OUTPUT_PREFIX}TargetMaskImageMajorityVoting_Mask.nii.gz"
+
         elif [[ -f ${TARGET_MASK_IMAGE} ]];
           then
             jlfCall="${jlfCall} -x ${TARGET_MASK_IMAGE}"
@@ -918,6 +927,8 @@ if [[ $DOQSUB -eq 4 ]];
               done
             maskCall="${maskCall} ${ANTSPATH}/ThresholdImage ${DIM} ${TARGET_MASK_IMAGE} ${TARGET_MASK_IMAGE} 0 0 0 1"
 
+            jlfCall="${jlfCall} -x ${TARGET_MASK_IMAGE}"
+
         elif [[ ${TARGET_MASK_IMAGE} == 'majorityvoting' ]];
           then
             MAJORITY_VOTING_IMAGE="${OUTPUT_PREFIX}TargetMaskImageMajorityVoting.nii.gz"
@@ -1005,6 +1016,8 @@ if [[ $DOQSUB -eq 2 ]];
                 maskCall="${maskCall} ${ANTSPATH}/ImageMath ${DIM} ${TARGET_MASK_IMAGE} max ${TARGET_MASK_IMAGE} ${EXISTING_WARPED_ATLAS_LABELS[$i]};"
               done
             maskCall="${maskCall} ${ANTSPATH}/ThresholdImage ${DIM} ${TARGET_MASK_IMAGE} ${TARGET_MASK_IMAGE} 0 0 0 1"
+
+            jlfCall="${jlfCall} -x ${TARGET_MASK_IMAGE}"
 
         elif [[ ${TARGET_MASK_IMAGE} == 'majorityvoting' ]];
           then
@@ -1105,6 +1118,8 @@ if [[ $DOQSUB -eq 3 ]];
                 maskCall="${maskCall} ${ANTSPATH}/ImageMath ${DIM} ${TARGET_MASK_IMAGE} max ${TARGET_MASK_IMAGE} ${EXISTING_WARPED_ATLAS_LABELS[$i]};"
               done
             maskCall="${maskCall} ${ANTSPATH}/ThresholdImage ${DIM} ${TARGET_MASK_IMAGE} ${TARGET_MASK_IMAGE} 0 0 0 1"
+
+            jlfCall="${jlfCall} -x ${TARGET_MASK_IMAGE}"
 
         elif [[ ${TARGET_MASK_IMAGE} == 'majorityvoting' ]];
           then
@@ -1208,6 +1223,8 @@ if [[ $DOQSUB -eq 5 ]];
                 maskCall="${maskCall} ${ANTSPATH}/ImageMath ${DIM} ${TARGET_MASK_IMAGE} max ${TARGET_MASK_IMAGE} ${EXISTING_WARPED_ATLAS_LABELS[$i]};"
               done
             maskCall="${maskCall} ${ANTSPATH}/ThresholdImage ${DIM} ${TARGET_MASK_IMAGE} ${TARGET_MASK_IMAGE} 0 0 0 1"
+
+            jlfCall="${jlfCall} -x ${TARGET_MASK_IMAGE}"
 
         elif [[ ${TARGET_MASK_IMAGE} == 'majorityvoting' ]];
           then
